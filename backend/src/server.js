@@ -1,14 +1,22 @@
 import express from 'express';
 import router from './routes/notesRoutes.js';
-import connect from './db/connect.js'
+import connect from './config/connect_db.js'
+import rateLimitMiddleware from './middleware/rateLimiter.js';
+import notFoundMiddleware from './middleware/not-found.js';
+import errorHandlerMiddleware from './middleware/errorHandler.js';
 const PORT = process.env.PORT || 8000;
 
 const app = express();
 
-// parsing req.body
+// parsing req.body with json payloads
 app.use(express.json());
+// rate limiter middleware
+app.use(rateLimitMiddleware);
 
 app.use('/api/notes', router);
+
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 
 const startServer = async () => {
     try {
