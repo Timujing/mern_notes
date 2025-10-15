@@ -4,9 +4,19 @@ import connect from './config/connect_db.js'
 import rateLimitMiddleware from './middleware/rateLimiter.js';
 import notFoundMiddleware from './middleware/not-found.js';
 import errorHandlerMiddleware from './middleware/errorHandler.js';
+import cors from 'cors';
 const PORT = process.env.PORT || 8000;
 
 const app = express();
+
+// give access origin to make requests. Should be first, then rateLimit
+if (process.env.NODE_ENV !== "production") {
+    app.use(
+      cors({
+        origin: "http://localhost:5173",
+      })
+    );
+}
 
 // parsing req.body with json payloads
 app.use(express.json());
