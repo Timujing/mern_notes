@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+    themes: sunset --default
+};
+
+/* for some reasons default value of --color-error in package is oklch(85.511% 0.078 16.886)*/
+:root {
+    --color-error: oklch(71% .194 13.428);
+}
