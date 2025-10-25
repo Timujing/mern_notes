@@ -5,11 +5,13 @@ import api from '../lib/axios';
 import toast from 'react-hot-toast';
 import NoteCard from '../components/NoteCard';
 import NotesNotFound from '../components/NotesNotFound';
+import { type Note } from '../types';
+import axios from 'axios';
 
 const HomePage = () => {
-    const [isRateLimited, setIsRateLimited] = useState(false);
-    const [notes, setNotes] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [isRateLimited, setIsRateLimited] = useState<boolean>(false);
+    const [notes, setNotes] = useState<Note[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchNotes = async () => {
@@ -19,14 +21,18 @@ const HomePage = () => {
                 console.log(response.data);
                 setNotes(response.data);
                 setIsRateLimited(false);
-            } catch (error) {
-                console.log(error);
+            } catch (error: unknown ) { //we always want to check type of error in catch block, and use then type guarding example
 
-                if (error.response.status === 429) {
-                    setIsRateLimited(true);
-                } else {
-                    toast.error('Failed to load notes');
+                console.log(error);
+                
+                if (axios.isAxiosError(error)) {
+                    if (error.status === 429) {
+                        setIsRateLimited(true);
+                    }
                 }
+
+                toast.error('Failed to load notes');
+                
             } finally {
                 setLoading(false);
             }

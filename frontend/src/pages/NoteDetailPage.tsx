@@ -3,11 +3,12 @@ import { Link, useNavigate, useParams } from 'react-router';
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
 import { ArrowLeftIcon, LoaderIcon, Trash2Icon } from "lucide-react";
+import type { Note } from '../types';
 
 const NoteDetailPage = () => {
-  const [note, setNote] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [note, setNote] = useState<Note | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [saving, setSaving] = useState<boolean>(false);
 
   const navigate = useNavigate();
   const {id} = useParams(); //get id from path
@@ -36,7 +37,7 @@ const NoteDetailPage = () => {
     if (!window.confirm("Are you sure you want to delete this note?")) return;
 
     try {
-      const response = await api.delete(`/notes/${id}`);
+      await api.delete(`/notes/${id}`);
       toast.success('note deleted!');
       navigate('/');
     } catch (error) {
@@ -48,6 +49,13 @@ const NoteDetailPage = () => {
   };
 
   const handleSave = async () => {
+    
+    if (!note) {
+      toast.error("note is null");
+      console.log(`note: ${note}`);
+      return;
+    }
+
     if (!note.title.trim() || !note.content.trim()) {
       toast.error("All fields are required");
       return;
@@ -73,6 +81,17 @@ const NoteDetailPage = () => {
         <LoaderIcon className='animate-spin size-10'/>
       </div>
     )
+  }
+  
+  if (!note) {
+    return (
+      <div className='min-h-screen bg-base-200 flex items-center justify-center'>
+        <div className="text-center">
+          <p>Note not found.</p>
+          <Link to='/' className='btn btn-primary mt-4'>Back to notes</Link>
+        </div>
+      </div>
+    );
   }
 
   return (
