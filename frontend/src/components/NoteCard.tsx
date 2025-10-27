@@ -4,10 +4,16 @@ import { Link } from 'react-router';
 import { formatDate } from '../lib/utils.tsx';
 import api from '../lib/axios.tsx';
 import toast from 'react-hot-toast';
+import { type Note } from '../types.ts';
 
-const NoteCard = ({note, setNotes}) => {
+interface NoteCardProps {
+  note: Note,
+  setNotes: React.Dispatch<React.SetStateAction<Note[]>>
+}
 
-  const handleDelete = async (e, id) => {
+const NoteCard = ({note, setNotes}: NoteCardProps) => {
+
+  const handleDelete = async (e: React.MouseEvent<HTMLButtonElement>, id: string) => {
     e.preventDefault();
 
     if (!window.confirm("Are you sure you want to delete this note?")) return;
@@ -32,8 +38,8 @@ const NoteCard = ({note, setNotes}) => {
       className='card bg-base-200 hover:shadow-lg hover:shadow-orange-500/50 transition-all duration-200 border-t-4 border-solid border-[var(--color-primary)]'
     >
       <div className='card-body'>
-        <h3 className='card-title text-base-content'>{note.title}</h3>
-        <p className='text-base-content/70 line-clamp-3'>{note.content}</p>
+        <h3 className='card-title text-base-content truncate'>{note.title}</h3>
+        <p className='text-base-content/70 line-clamp-3 text-ellipsis'>{note.content}</p>
         <div className='card-actions justify-between'>
           <span className='text-sm text-base-content/60'>
             {formatDate(new Date(note.createdAt))}

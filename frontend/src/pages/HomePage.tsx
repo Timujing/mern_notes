@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import NoteCard from '../components/NoteCard';
 import NotesNotFound from '../components/NotesNotFound';
 import { type Note } from '../types';
-import axios from 'axios';
+import {isAxiosError} from 'axios';
 
 const HomePage = () => {
     const [isRateLimited, setIsRateLimited] = useState<boolean>(false);
@@ -25,7 +25,7 @@ const HomePage = () => {
 
                 console.log(error);
                 
-                if (axios.isAxiosError(error)) {
+                if (isAxiosError(error)) {
                     if (error.status === 429) {
                         setIsRateLimited(true);
                     }

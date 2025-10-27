@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router';
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
@@ -9,6 +9,7 @@ const NoteDetailPage = () => {
   const [note, setNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const navigate = useNavigate();
   const {id} = useParams(); //get id from path
@@ -20,7 +21,7 @@ const NoteDetailPage = () => {
         const response = await api.get(`/notes/${id}`);
         setNote(response.data);
         
-      } catch (error) {
+      } catch (error: unknown) {
         
           console.log("error in fetching note", error);
           toast.error('something went wrong');
@@ -32,6 +33,13 @@ const NoteDetailPage = () => {
 
     fetchNote();
   }, [id])
+
+  // expand textarea to scrollHeight, track 'note' state update
+  useEffect(() => {
+    if (textAreaRef.current instanceof HTMLTextAreaElement) {
+      textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
+    }
+  }, [note]);
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this note?")) return;
@@ -129,10 +137,11 @@ const NoteDetailPage = () => {
                 </label>
                 <textarea
                   value={note.content}
-                  className="textarea h-32 lg:textarea-lg lg:min-w-xl sm:min-w-auto"
+                  className="textarea h-auto lg:textarea-lg lg:min-w-xl sm:min-w-auto"
                   name="content"
                   onChange={(e) => setNote({...note, content: e.target.value})}
                   id="content"
+                  ref={textAreaRef}
                 />
               </div>
 

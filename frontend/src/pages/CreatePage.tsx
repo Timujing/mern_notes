@@ -1,17 +1,26 @@
 import { ArrowLeft } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate  } from 'react-router';
 import toast from 'react-hot-toast';
 import api from '../lib/axios';
+import {isAxiosError} from 'axios';
 
 const CreatePage = () => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (formData) => {
+  const handleSubmit = async (formData: FormData): Promise<void> => {
     
-    const data = Object.fromEntries(formData);
-    if (!data.title.trim() || !data.content.trim()) {
+    const title = formData.get('title');
+    const content = formData.get('content');
+ 
+    if (typeof title !== 'string' || typeof content !== 'string') {
+      toast.error('title and content are not string');
+      console.log('for some reason title and content are not string');
+      return;
+    }
+
+    if (!title.trim() || !content.trim()) {
       toast.error("All fields are required");
       return;
     }
@@ -19,11 +28,8 @@ const CreatePage = () => {
     setLoading(true);
 
     try {
-      const response = await api.post('/notes', data, {
-        headers: {
-          'Content-type': 'application/json'
-        }        
-      });
+      // https://github.com/axios/axios/blob/d000fbfd0722a9c3bd0bcea3451c6d515813635d/lib/defaults/index.js#L92 by default if payload is obj axios set headers 'apliaction/json' and automatically will use stringifySafely and return JSON.stringify(rawvalue);
+      const response = await api.post('/notes', {title, content});
 
       if (response.status == 201) {
         
@@ -32,14 +38,17 @@ const CreatePage = () => {
         navigate('/');
       }
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.log('error creating note', error);
 
-      if (error.status == 429) {
-        return toast.error("Slow down! You're creating notes too fast", {
-          duration: 4000,
-          icon: "💀",
-        })
+      if (isAxiosError(error)) {        
+        if (error.status == 429) {
+          toast.error("Slow down! You're creating notes too fast", {
+            duration: 4000,
+            icon: "💀",
+          });
+          return;
+        }        
       }
 
       toast.error('Failed to create note');
@@ -65,10 +74,10 @@ const CreatePage = () => {
                 <div className='mb-4'>
                   <label className='input'>
                     <span className='label'>Title</span>
-                    <input type="text" 
+                    <input type="text"
                       name="title"
                       placeholder='Note title'
-                      defaultValue=''                      
+                      defaultValue=''
                     />
                   </label>
                 </div>
@@ -81,8 +90,7 @@ const CreatePage = () => {
                     placeholder="Write your content of note here..."
                     className="textarea h-32 lg:textarea-lg lg:min-w-xl sm:min-w-auto"
                     defaultValue=''
-                    name="content"
-                    // onChange={(e) => setContent(e.target.value)}
+                    name="content"                    
                     id="content"
                   />
                 </div>

@@ -14,7 +14,7 @@ const App = () => {
         <Route path='/create' element={<CreatePage/>} />
         <Route path='/note/:id' element={<NoteDetailPage/>} />
       </Routes>
-      <Toaster></Toaster>
+      <Toaster/>
     </div>
   )
 }
