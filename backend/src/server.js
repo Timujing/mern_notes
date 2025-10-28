@@ -1,10 +1,13 @@
 import express from 'express';
-import router from './routes/notesRoutes.js';
+import notesRouter from './routes/notesRoutes.js';
+import authRouter from './routes/authRoutes.js';
 import connect from './config/connect_db.js'
 import rateLimitMiddleware from './middleware/rateLimiter.js';
 import notFoundMiddleware from './middleware/not-found.js';
 import errorHandlerMiddleware from './middleware/errorHandler.js';
+import authMiddleware from './middleware/authMiddleware.js';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 const PORT = process.env.PORT || 8000;
 
 const app = express();
@@ -20,10 +23,13 @@ if (process.env.NODE_ENV !== "production") {
 
 // parsing req.body with json payloads
 app.use(express.json());
+// parsing req.cookies with cookie parser https://github.com/expressjs/cookie-parser#readme
+app.use(cookieParser());
 // rate limiter middleware
 app.use(rateLimitMiddleware);
 
-app.use('/api/notes', router);
+app.use('/api/auth', authRouter);
+app.use('/api/notes', authMiddleware, notesRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
